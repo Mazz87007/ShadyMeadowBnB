@@ -38,37 +38,45 @@ public class bookingCreation {
     }
 
     @Test
-    public void createBookingOmitEmailAsserCorrectError() throws Exception {
+    public void createBookingOmitEmailAsserCorrectErrorIsDisplayed() throws Exception {
         driver.get("https://automationintesting.online/");
         driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div/div[3]/button")).click();
-        WebElement sourceDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[2]/button"));
-        WebElement targetDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[5]/button"));
+        WebElement sourceDate = driver.findElement(By.xpath("//button[text()='10']"));
+        WebElement targetDate = driver.findElement(By.xpath("//button[text()='11']"));
         dragAndDrop(sourceDate, targetDate);
         driver.findElement(By.name("firstname")).click();
         driver.findElement(By.name("firstname")).clear();
         driver.findElement(By.name("firstname")).sendKeys("NameFirst");
+        driver.findElement(By.name("lastname")).click();
         driver.findElement(By.name("lastname")).clear();
         driver.findElement(By.name("lastname")).sendKeys("NameLast");
-        driver.findElement(By.name("email")).clear();
-        driver.findElement(By.name("email")).sendKeys("justanotheremail@email.com");
-        driver.findElement(By.name("phone")).clear();
-        driver.findElement(By.name("phone")).sendKeys("1234567899");
-        driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div[2]/div[3]/button[2]")).click();
         driver.findElement(By.name("phone")).click();
         driver.findElement(By.name("phone")).clear();
         driver.findElement(By.name("phone")).sendKeys("12345678991");
         driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div[2]/div[3]/button[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::p[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::button[1]")).click();
+
+        // Wait for the modal to appear
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class,'alert')]")));
+
+        WebElement warningMessage = modal.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[3]/div[5]/p"));
+        String warningMessageReceived = warningMessage.getText();
+        String warningMessageExpected = "must not be empty";
+
+        assertEquals(warningMessageReceived, warningMessageExpected);
+
+
+
+        //locator for warning message /html/body/div/div/div/div[4]/div/div[2]/div[3]/div[5]/p = "must not be empty"
 
     }
 
     @Test
-    public void createSuccessfullBookingAssertCorrectDate() throws Exception {
+    public void createSuccessfulBookingFrom14112023To17112023AssertCorrectDate() throws Exception {
         driver.get("https://automationintesting.online/");
         driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div/div[3]/button")).click();
-        WebElement sourceDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[2]/button"));
-        WebElement targetDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[5]/button"));
+        WebElement sourceDate = driver.findElement(By.xpath("//button[text()='14']"));
+        WebElement targetDate = driver.findElement(By.xpath("//button[text()='17']"));
         dragAndDrop(sourceDate, targetDate);
         driver.findElement(By.name("firstname")).click();
         driver.findElement(By.name("firstname")).clear();
@@ -84,55 +92,41 @@ public class bookingCreation {
         driver.findElement(By.name("phone")).clear();
         driver.findElement(By.name("phone")).sendKeys("12345678991");
         driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div[2]/div[3]/button[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::p[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::button[1]")).click();
 
         // After booking is created, wait for the modal to appear
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("confirmation-modal")));
+        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@tabindex='-1']")));
+
+        driver.findElement(By.xpath("//div[@tabindex='-1']"));
+        driver.findElement(By.xpath("/html/body/div[4]/div/div/div[1]/div[2]/h3"));
+        driver.findElement(By.xpath("/html/body/div[4]/div/div/div[1]/div[2]/p[2]"));
+
+        // Modal appears //div[@tabindex='-1']
+        // Booking successful message: /html/body/div[4]/div/div/div[1]/div[2]/h3
+        // Dates of booking: /html/body/div[4]/div/div/div[1]/div[2]/p[2]
 
         // Locate the element containing the from and to dates
+        WebElement confirmationMessage = modal.findElement(By.xpath("/html/body/div[4]/div/div/div[1]/div[2]/h3"));
+
+        String actualConfirmationMessage = confirmationMessage.getText();
+        String expectedConfirmationMessage = "Booking Successful!";
+
+        assertEquals(actualConfirmationMessage, confirmationMessage.getText());
+
         WebElement dateElement = modal.findElement(By.xpath("//div[@class='form-row']/div[@class='col-sm-6 text-center']/p[2]"));
 
         // Get the text content of the element
         String dateText = dateElement.getText();
 
         // Extract the actual from and to dates from the text (modify as per your date format)
-        String expectedFromDate = "2023-11-01";
-        String expectedToDate = "2023-11-03";
+        String expectedFromDate = "2023-11-14";
+        String expectedToDate = "2023-11-17";
 
         // Assert that the actual dates match the expected dates
         assertTrue(dateText.contains(expectedFromDate) && dateText.contains(expectedToDate),
-                "From and to dates in the modal do not match the expected dates");
+                "From and to dates in the modal do not match the expected dates of 2023-11-14 - 2023-11-17" + ", the dates booked are: " + dateText);
 
     }
-
-    @Test
-    public void deleteBooking() throws Exception {
-        driver.get("https://automationintesting.online/");
-        driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div/div[3]/button")).click();
-        WebElement sourceDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[2]/button"));
-        WebElement targetDate = driver.findElement(By.xpath("/html/body/div/div/div/div[4]/div/div[2]/div[2]/div/div[2]/div[4]/div[2]/div[1]/div[5]/button"));
-        dragAndDrop(sourceDate, targetDate);
-        driver.findElement(By.name("firstname")).click();
-        driver.findElement(By.name("firstname")).clear();
-        driver.findElement(By.name("firstname")).sendKeys("NameFirst");
-        driver.findElement(By.name("lastname")).clear();
-        driver.findElement(By.name("lastname")).sendKeys("NameLast");
-        driver.findElement(By.name("email")).clear();
-        driver.findElement(By.name("email")).sendKeys("justanotheremail@email.com");
-        driver.findElement(By.name("phone")).clear();
-        driver.findElement(By.name("phone")).sendKeys("1234567899");
-        driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div[2]/div[3]/button[2]")).click();
-        driver.findElement(By.name("phone")).click();
-        driver.findElement(By.name("phone")).clear();
-        driver.findElement(By.name("phone")).sendKeys("12345678991");
-        driver.findElement(By.xpath("//div[@id='root']/div[2]/div/div[4]/div/div[2]/div[3]/button[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::p[2]")).click();
-        driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Booking Successful!'])[1]/following::button[1]")).click();
-
-    }
-
 
 
     @AfterClass(alwaysRun = true)

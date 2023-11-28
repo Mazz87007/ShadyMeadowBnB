@@ -59,6 +59,15 @@ public class bookingDeletion {
         driver.findElement(By.id("password")).sendKeys("password");
         driver.findElement(By.id("doLogin")).click();
         driver.findElement(By.xpath("//div[@id='room1']/div[2]")).click();
+
+        //Admin booking
+        //booking Name 1: /html/body/div/div/div/div/div/div/div[3]/div[1]/div/div/div[1]
+        //booking Name 2: /html/body/div/div/div/div/div/div/div[3]/div[2]/div/div/div[1]
+        //booking Name 3: /html/body/div/div/div/div/div/div/div[3]/div[3]/div/div/div[1]/p
+        //Here I need code to loop through the names and and when it finds the booking created it must delete it,
+        // I also need an assertion to confirm that the booking has been deleted
+
+
         driver.findElement(By.xpath("//div[@id='root']/div/div/div/div/div/div[3]/div[3]/div/div/div")).click();
         driver.findElement(By.xpath("//div[@id='root']/div/div/div/div/div/div[3]/div[3]/div/div/div[7]/span[2]")).click();
     }
