@@ -89,10 +89,10 @@ public class BookingPlatform extends AbstractComponent {
         return confirmationModal.findElement(bookingConfirmationDates).getText();
     }
 
-    public void closeAlertModal() {
-        WebElement modal = waitForAlertModal();
+    public void closeConfirmationModal() {
+        WebElement modal = waitForConfirmationModal();
         WebElement closeBtn = modal.findElement(closeModal);
-        click((By) closeBtn);
+        click(closeModal);
     }
 
     public void openAdminPortal() {

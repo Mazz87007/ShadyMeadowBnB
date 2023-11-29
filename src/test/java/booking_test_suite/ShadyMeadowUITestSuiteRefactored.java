@@ -56,8 +56,6 @@ public class ShadyMeadowUITestSuiteRefactored {
 
             assertEquals(warningMessageReceived, warningMessageExpected);
 
-            shadyMeadowsBooking.bookingPlatform.closeAlertModal();
-
         } catch (Exception e) {
             captureScreenshot();
             throw e;
@@ -66,20 +64,17 @@ public class ShadyMeadowUITestSuiteRefactored {
 
     @Test
     @Description("Test to create a successful booking from 14/11/2023 to 17/11/2023 and assert correct date")
-    public void createSuccessfulBookingFrom14112023To17112023AssertCorrectDate1() throws Exception {
+    public void createSuccessfulBookingFrom14112023To17112023AssertCorrectDate() throws Exception {
         try {
 
             WebDriver driver = new FirefoxDriver();
             ShadyMeadowsBooking shadyMeadowsBooking = new ShadyMeadowsBooking(driver);
-            shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Pams", "Backhurts","readall@emails.com","123456789998", "14", "17");
+            shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Keith", "Richards","readall@emails.com","123456789998", "14", "17");
 
             WebElement confirmationModal = shadyMeadowsBooking.bookingPlatform.waitForConfirmationModal();
             String confirmationMessageReceived = shadyMeadowsBooking.bookingPlatform.getConfirmationMessage(confirmationModal);
             String expectedConfirmationMessage = "Booking Successful!";
             assertEquals(confirmationMessageReceived, expectedConfirmationMessage);
-
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@tabindex='-1']")));
 
             String bookingDates = shadyMeadowsBooking.bookingPlatform.getConfirmationDates(confirmationModal);
 
@@ -99,45 +94,32 @@ public class ShadyMeadowUITestSuiteRefactored {
     @Test
     @Description("Test to delete a created booking")
     public void deleteCreatedBooking() throws Exception {
-
-        WebDriver driver = new FirefoxDriver();
         ShadyMeadowsBooking shadyMeadowsBooking = new ShadyMeadowsBooking(driver);
-        shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Booking", "ForDeletion","delete@booking.com","987654321112", "14", "17");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-//        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@tabindex='-1']")));
-
-        driver.findElement(By.xpath("//button[text()='Close']")).click();
+        shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Booking", "ForDeletion", "delete@booking.com", "987654321112", "20", "22");
+        shadyMeadowsBooking.bookingPlatform.closeConfirmationModal();
 
         shadyMeadowsBooking.bookingPlatform.openAdminPortal();
-        shadyMeadowsBooking.adminLogin.login("admin","password");
+        shadyMeadowsBooking.adminLogin.login("admin", "password");
 
-        WebElement roomElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='room1']/div[2]")));
+        shadyMeadowsBooking.adminHomeScreen.selectRoom();
 
-        driver.findElement(By.xpath("//div[@id='room1']/div[2]")).click();
-        // XPath for the container of booking details
-        String bookingContainerXPath = "//div[@class='detail booking-1']";
+        List<WebElement> bookingContainers = shadyMeadowsBooking.adminRoomDetailPage.waitForBookingContainers();
 
-        // Get all booking containers
-        List<WebElement> bookingContainers = driver.findElements(By.xpath(bookingContainerXPath));
+        // Log the details of all bookings for debugging
+        for (WebElement bookingContainer : bookingContainers) {
+            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
+            System.out.println("Found Booking: " + firstName);
+        }
 
         boolean bookingFound = false;
-
-        // Loop through booking containers
         for (WebElement bookingContainer : bookingContainers) {
-            // Extract first name from the booking container
-            String firstName = bookingContainer.findElement(By.cssSelector(".col-sm-2 > p:nth-of-type(1)")).getText();
-
-            System.out.println("Found Booking: " + firstName);
-
-            // Check if the first name matches the one you want to delete
+            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
             if (firstName.equals("Booking")) {
-                // Found the booking, perform deletion
                 System.out.println("Deleting Booking: " + firstName);
-                bookingContainer.findElement(By.cssSelector(".col-sm-1 > span.fa-trash")).click();
-                // Add additional steps if needed (e.g., confirm deletion)
+                shadyMeadowsBooking.adminRoomDetailPage.deleteBooking(bookingContainer);
                 bookingFound = true;
-                break; // Break the loop after deleting the booking
+                break;
             }
         }
 
