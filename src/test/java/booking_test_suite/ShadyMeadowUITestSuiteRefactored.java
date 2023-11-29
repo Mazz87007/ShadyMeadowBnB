@@ -42,6 +42,42 @@ public class ShadyMeadowUITestSuiteRefactored {
     }
 
     @Test
+    @Description("Test to delete a created booking")
+    public void deleteCreatedBooking() throws Exception {
+        ShadyMeadowsBooking shadyMeadowsBooking = new ShadyMeadowsBooking(driver);
+
+        shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Booking", "ForDeletion", "delete@booking.com", "987654321112", "20", "22");
+        shadyMeadowsBooking.bookingPlatform.closeConfirmationModal();
+
+        shadyMeadowsBooking.bookingPlatform.openAdminPortal();
+        shadyMeadowsBooking.adminLogin.login("admin", "password");
+
+        shadyMeadowsBooking.adminHomeScreen.selectRoom();
+
+        List<WebElement> bookingContainers = shadyMeadowsBooking.adminRoomDetailPage.waitForBookingContainers();
+
+        // Log the details of all bookings for debugging
+        for (WebElement bookingContainer : bookingContainers) {
+            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
+            System.out.println("Found Booking: " + firstName);
+        }
+
+        boolean bookingFound = false;
+        for (WebElement bookingContainer : bookingContainers) {
+            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
+            if (firstName.equals("Booking")) {
+                System.out.println("Deleting Booking: " + firstName);
+                shadyMeadowsBooking.adminRoomDetailPage.deleteBooking(bookingContainer);
+                bookingFound = true;
+                break;
+            }
+        }
+
+        // Assert that the booking was found and deleted
+        assertTrue(bookingFound, "Booking was not found for deletion");
+    }
+
+    @Test
     @Description("Test to create a booking with omitted email and assert correct error message")
     public void createBookingOmitEmailAssertCorrectErrorIsDisplayed() throws Exception {
         try {
@@ -91,41 +127,7 @@ public class ShadyMeadowUITestSuiteRefactored {
         }
     }
 
-    @Test
-    @Description("Test to delete a created booking")
-    public void deleteCreatedBooking() throws Exception {
-        ShadyMeadowsBooking shadyMeadowsBooking = new ShadyMeadowsBooking(driver);
 
-        shadyMeadowsBooking.bookingPlatform.createCompleteBooking("Booking", "ForDeletion", "delete@booking.com", "987654321112", "20", "22");
-        shadyMeadowsBooking.bookingPlatform.closeConfirmationModal();
-
-        shadyMeadowsBooking.bookingPlatform.openAdminPortal();
-        shadyMeadowsBooking.adminLogin.login("admin", "password");
-
-        shadyMeadowsBooking.adminHomeScreen.selectRoom();
-
-        List<WebElement> bookingContainers = shadyMeadowsBooking.adminRoomDetailPage.waitForBookingContainers();
-
-        // Log the details of all bookings for debugging
-        for (WebElement bookingContainer : bookingContainers) {
-            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
-            System.out.println("Found Booking: " + firstName);
-        }
-
-        boolean bookingFound = false;
-        for (WebElement bookingContainer : bookingContainers) {
-            String firstName = shadyMeadowsBooking.adminRoomDetailPage.getFirstNameFromBookingContainer(bookingContainer);
-            if (firstName.equals("Booking")) {
-                System.out.println("Deleting Booking: " + firstName);
-                shadyMeadowsBooking.adminRoomDetailPage.deleteBooking(bookingContainer);
-                bookingFound = true;
-                break;
-            }
-        }
-
-        // Assert that the booking was found and deleted
-        assertTrue(bookingFound, "Booking was not found for deletion");
-    }
 
     @Attachment(value = "Screenshot", type = "image/png")
     public byte[] captureScreenshot() {
